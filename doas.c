@@ -228,6 +228,9 @@ parseconfdir(const char *dirpath, int checkperms)
 		free(dirent_table[i]);
 
 		/* make sure path ends in .conf */
+		if (pathlen < 6)
+			continue;
+
 		if (strcmp(pathbuf + (pathlen - 5), ".conf"))
 			continue;
 
