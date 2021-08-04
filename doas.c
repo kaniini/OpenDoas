@@ -191,8 +191,13 @@ isconfdir(const char *dirpath)
 {
 	struct stat sb;
 
-	if (lstat(dirpath, &sb) != 0)
-		err(1, "lstat(\"%s\")", dirpath);
+	if (lstat(dirpath, &sb) != 0) {
+		if (errno != ENOENT)
+			err(1, "lstat(\"%s\")", dirpath);
+
+		errno = ENOTDIR;
+		return 0;
+	}
 
 	if ((sb.st_mode & (S_IFMT)) == S_IFDIR)
 		return 1;
