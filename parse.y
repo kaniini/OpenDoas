@@ -49,6 +49,7 @@ typedef struct {
 } yystype;
 #define YYSTYPE yystype
 
+const char *yyfn;
 FILE *yyfp;
 
 struct rule **rules;
@@ -203,7 +204,7 @@ yyerror(const char *fmt, ...)
 	va_start(va, fmt);
 	vfprintf(stderr, fmt, va);
 	va_end(va);
-	fprintf(stderr, " at line %d\n", yylval.lineno + 1);
+	fprintf(stderr, " at %s, line %d\n", yyfn, yylval.lineno + 1);
 	parse_errors++;
 }
 

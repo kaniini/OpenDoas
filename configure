@@ -27,6 +27,7 @@ usage: configure [options]
   --without-shadow       disable shadow support
 
   --with-timestamp       enable timestamp support
+  --with-doas-confdir    enable configuration directory support
 
   --uid-max=NUM          set UID_MAX (default 65535)
   --gid-max=NUM          set GID_MAX (default 65535)
@@ -38,6 +39,7 @@ EOF
 
 # defaults
 WITHOUT_TIMESTAMP=yes
+WITHOUT_CONFDIR=yes
 UID_MAX=65535
 GID_MAX=65535
 
@@ -56,6 +58,8 @@ for x; do
 	--target) TARGET=$var ;;
 	--enable-debug) DEBUG=yes ;;
 	--enable-static) BUILD_STATIC=yes ;;
+	--with-doas-confdir) WITHOUT_CONFDIR= ;;
+	--without-doas-confdir) WITHOUT_CONFDIR=yes ;;
 	--with-pam) WITHOUT_PAM=; WITHOUT_SHADOW=yes ;;
 	--with-shadow) WITHOUT_SHADOW=; WITHOUT_PAM=yes ;;
 	--without-pam) WITHOUT_PAM=yes ;;
@@ -557,5 +561,9 @@ else
 fi
 
 printf '#define DOAS_CONF "%s/doas.conf"\n' "${SYSCONFDIR}" >>$CONFIG_H
+
+if [ -z "$WITHOUT_CONFDIR" ]; then
+	printf '#define DOAS_CONFDIR "%s/doas.d"\n' "${SYSCONFDIR}" >>$CONFIG_H
+fi
 
 printf '\n#endif /* CONFIG_H */\n' >>$CONFIG_H

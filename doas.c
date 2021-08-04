@@ -35,6 +35,7 @@
 #include <syslog.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <dirent.h>
 
 #include "openbsd.h"
 #include "doas.h"
@@ -155,6 +156,7 @@ permit(uid_t uid, gid_t *groups, int ngroups, const struct rule **lastr,
 static void
 parseconfig(const char *filename, int checkperms)
 {
+	extern const char *yyfn;
 	extern FILE *yyfp;
 	extern int yyparse(void);
 	struct stat sb;
@@ -163,6 +165,8 @@ parseconfig(const char *filename, int checkperms)
 	if (!yyfp)
 		err(1, checkperms ? "doas is not enabled, %s" :
 		    "could not open config file %s", filename);
+
+	yyfn = filename;
 
 	if (checkperms) {
 		if (fstat(fileno(yyfp), &sb) != 0)
@@ -174,10 +178,66 @@ parseconfig(const char *filename, int checkperms)
 	}
 
 	yyparse();
+	yyfn = NULL;
+
 	fclose(yyfp);
 	if (parse_errors)
 		exit(1);
 }
+
+#ifdef DOAS_CONFDIR
+static int
+isconfdir(const char *dirpath)
+{
+	struct stat sb;
+
+	if (lstat(dirpath, &sb) != 0)
+		err(1, "lstat(\"%s\")", dirpath);
+
+	if ((sb.st_mode & (S_IFMT)) == S_IFDIR)
+		return 1;
+
+	errno = ENOTDIR;
+	return 0;
+}
+
+static void
+parseconfdir(const char *dirpath, int checkperms)
+{
+	struct dirent **dirent_table;
+	size_t i, dirent_count;
+	char pathbuf[PATH_MAX];
+
+	if (!isconfdir(dirpath))
+		err(1, checkperms ? "doas is not enabled, %s" :
+		    "could not open config directory %s", dirpath);
+
+	dirent_count = scandir(dirpath, &dirent_table, NULL, alphasort);
+
+	for (i = 0; i < dirent_count; i++)
+	{
+		struct stat sb;
+		size_t pathlen;
+
+		pathlen = snprintf(pathbuf, sizeof pathbuf, "%s/%s", dirpath, dirent_table[i]->d_name);
+		free(dirent_table[i]);
+
+		/* make sure path ends in .conf */
+		if (strcmp(pathbuf + (pathlen - 5), ".conf"))
+			continue;
+
+		if (stat(pathbuf, &sb) != 0)
+			err(1, "stat(\"%s\")", pathbuf);
+
+		if ((sb.st_mode & (S_IFMT)) != S_IFREG)
+			continue;
+
+		parseconfig(pathbuf, checkperms);
+	}
+
+	free(dirent_table);
+}
+#endif
 
 static void __dead
 checkconfig(const char *confpath, int argc, char **argv,
@@ -188,7 +248,13 @@ checkconfig(const char *confpath, int argc, char **argv,
 	if (setresuid(uid, uid, uid) != 0)
 		err(1, "setresuid");
 
+#ifdef DOAS_CONFDIR
+	if (isconfdir(confpath))
+		parseconfdir(confpath, 0);
+	else
+#else
 	parseconfig(confpath, 0);
+#endif
 	if (!argc)
 		exit(0);
 
@@ -330,7 +396,13 @@ main(int argc, char **argv)
 	if (geteuid())
 		errx(1, "not installed setuid");
 
+#ifdef DOAS_CONFDIR
+	if (isconfdir(DOAS_CONFDIR))
+		parseconfdir(DOAS_CONFDIR, 1);
+	else
+#else
 	parseconfig(DOAS_CONF, 1);
+#endif
 
 	/* cmdline is used only for logging, no need to abort on truncate */
 	(void)strlcpy(cmdline, argv[0], sizeof(cmdline));

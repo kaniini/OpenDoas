@@ -61,3 +61,12 @@ similar to sudo.
 
 See the comment block in `timestamp.c` for an in-depth description on how
 timestamps are created and checked to be as safe as possible.
+
+### `--with-doas-confdir`
+
+An optional feature can be enabled which will result in `doas` reading configuration
+snippets from `/etc/doas.d`.  These configuration snippets have the same requirements
+as `/etc/doas.conf` (owned by root, not world-writable).
+
+If this feature is enabled, only the `/etc/doas.d` directory is read, and the historical
+`/etc/doas.conf` file is ignored.
