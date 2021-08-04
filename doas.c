@@ -210,7 +210,7 @@ static void
 parseconfdir(const char *dirpath, int checkperms)
 {
 	struct dirent **dirent_table;
-	size_t i, dirent_count;
+	int i, dirent_count;
 	char pathbuf[PATH_MAX];
 
 	if (!isconfdir(dirpath))
@@ -218,6 +218,9 @@ parseconfdir(const char *dirpath, int checkperms)
 		    "could not open config directory %s", dirpath);
 
 	dirent_count = scandir(dirpath, &dirent_table, NULL, alphasort);
+	if (dirent_count < 0)
+		err(1, checkperms ? "doas is not enabled, %s" :
+		    "could not open config directory %s", dirpath);
 
 	for (i = 0; i < dirent_count; i++)
 	{
