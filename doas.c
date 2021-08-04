@@ -249,11 +249,8 @@ parseconfdir(const char *dirpath, int checkperms)
 
 	free(dirent_table);
 
-	if (!m) {
-		fprintf(stderr, "doas is not enabled, %s: no matching configuration files found\n",
-			dirpath);
-		exit(1);
-	}
+	if (!m)
+		errx(1, "doas is not enabled, %s: no matching configuration files found\n", dirpath);
 }
 #endif
 
