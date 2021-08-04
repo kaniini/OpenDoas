@@ -267,9 +267,8 @@ checkconfig(const char *confpath, int argc, char **argv,
 	if (isconfdir(confpath))
 		parseconfdir(confpath, 0);
 	else
-#else
-	parseconfig(confpath, 0);
 #endif
+	parseconfig(confpath, 0);
 	if (!argc)
 		exit(0);
 
@@ -415,9 +414,8 @@ main(int argc, char **argv)
 	if (isconfdir(DOAS_CONFDIR))
 		parseconfdir(DOAS_CONFDIR, 1);
 	else
-#else
-	parseconfig(DOAS_CONF, 1);
 #endif
+	parseconfig(DOAS_CONF, 1);
 
 	/* cmdline is used only for logging, no need to abort on truncate */
 	(void)strlcpy(cmdline, argv[0], sizeof(cmdline));
