@@ -210,7 +210,7 @@ static void
 parseconfdir(const char *dirpath, int checkperms)
 {
 	struct dirent **dirent_table;
-	int i, dirent_count;
+	int i, m, dirent_count;
 	char pathbuf[PATH_MAX];
 
 	if (!isconfdir(dirpath))
@@ -222,7 +222,7 @@ parseconfdir(const char *dirpath, int checkperms)
 		err(1, checkperms ? "doas is not enabled, %s" :
 		    "could not open config directory %s", dirpath);
 
-	for (i = 0; i < dirent_count; i++)
+	for (i = 0, m = 0; i < dirent_count; i++)
 	{
 		struct stat sb;
 		size_t pathlen;
@@ -244,9 +244,16 @@ parseconfdir(const char *dirpath, int checkperms)
 			continue;
 
 		parseconfig(pathbuf, checkperms);
+		m++;
 	}
 
 	free(dirent_table);
+
+	if (!m) {
+		fprintf(stderr, "doas is not enabled, %s: no matching configuration files found\n",
+			dirpath);
+		exit(1);
+	}
 }
 #endif
 
