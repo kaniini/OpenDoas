@@ -1,0 +1,50 @@
+.\"Copyright (c) 2021 Ariadne Conill <ariadne@dereferenced.org>
+.\"
+.\"Permission to use, copy, modify, and distribute this software for any
+.\"purpose with or without fee is hereby granted, provided that the above
+.\"copyright notice and this permission notice appear in all copies.
+.\"
+.\"THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\"WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\"MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\"ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\"WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\"ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\"OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.Dd $Mdocdate: October 9 2020 $
+.Dt DOAS.CONF 5
+.Os
+.Sh NAME
+.Nm doas.conf
+.Nd doas configuration file
+.Sh DESCRIPTION
+The
+.Xr doas 1
+utility executes commands as other users according to the rules
+configured in either the configuration file or, optionally, the
+configuration directory.  The preference to use the configuration
+file or configuration directory is determined at compile time,
+.Xr doas 1
+will only consult one or the other.
+.Pp
+Configuration snippets stored in the configuration directory
+follow the same rules as the classic
+.Xr doas 1
+configuration file, documented in
+.Xr doas.conf 5 .
+They must end with the .conf extension, or they will be ignored.
+.Pp
+These snippets are read in alphabetical order and thus can be
+ordered in the same way as other configuration directories.
+.Sh FILES
+.Bl -tag -width /etc/doas.d -compact
+.It Pa /etc/doas.d
+.Xr doas 1
+configuration directory.
+.Sh SEE ALSO
+.Xr doas 1 ,
+.Xr doas.conf 5
+.Sh HISTORY
+The
+.Nm
+configuration directory first appeared in OpenDoas.
